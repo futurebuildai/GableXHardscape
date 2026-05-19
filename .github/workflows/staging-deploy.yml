@@ -12,7 +12,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Guard: only run when RAILWAY_TOKEN is configured. Until then,
+      # the staging Railway deploy is driven manually by `railway up`
+      # from Colton's local machine (see Migration/Upstream-Rebase-Plan-2026-05.md).
+      - name: Check for RAILWAY_TOKEN
+        id: check_token
+        run: |
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+            echo "RAILWAY_TOKEN secret not set — skipping Railway deploy."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install Railway CLI
+        if: steps.check_token.outputs.configured == 'true'
         run: |
           curl -sSL -o /tmp/railway.tar.gz \
             https://github.com/railwayapp/cli/releases/download/v4.59.0/railway-v4.59.0-x86_64-unknown-linux-musl.tar.gz
@@ -20,16 +34,14 @@ jobs:
           sudo mv /tmp/railway /usr/local/bin/railway
           railway --version
 
-      # Both Dockerfiles use repo-root-relative paths (COPY backend/...,
-      # COPY app/...), so railway up must run from the repo root. The
-      # RAILWAY_DOCKERFILE_PATH env var on each Railway service picks
-      # the right Dockerfile.
       - name: Deploy Backend
+        if: steps.check_token.outputs.configured == 'true'
         run: railway up --service backend --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Deploy Frontend
+        if: steps.check_token.outputs.configured == 'true'
         run: railway up --service frontend --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
