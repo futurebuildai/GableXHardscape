@@ -33,6 +33,7 @@ COPY --from=builder /app/seed ./seed
 
 # Copy migrations for runtime use
 COPY --from=builder /app/migrations ./migrations
+RUN chmod -R a+rX /app/migrations
 
 # Create writable directories for file uploads and EDI exports
 RUN mkdir -p /app/uploads /app/edi_out && \
