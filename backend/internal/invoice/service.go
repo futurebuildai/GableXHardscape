@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gablelbm/gable/internal/account"
-	"github.com/gablelbm/gable/internal/gl"
-	"github.com/gablelbm/gable/pkg/audit"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/internal/account"
+	"github.com/futurebuildai/gablexhardscape/internal/gl"
+	"github.com/futurebuildai/gablexhardscape/pkg/audit"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 

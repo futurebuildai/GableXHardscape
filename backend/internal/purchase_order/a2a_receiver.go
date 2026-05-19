@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gablelbm/gable/pkg/middleware"
+	"github.com/futurebuildai/gablexhardscape/pkg/middleware"
 	jose "github.com/go-jose/go-jose/v4"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"

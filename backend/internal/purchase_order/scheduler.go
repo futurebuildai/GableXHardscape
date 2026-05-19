@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/robfig/cron/v3"
 )
 

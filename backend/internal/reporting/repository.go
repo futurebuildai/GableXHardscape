@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 )
 
 type Repository interface {

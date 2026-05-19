@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gablelbm/gable/internal/domain"
+	"github.com/futurebuildai/gablexhardscape/internal/domain"
 )
 
 // Generate850 creates an X12 850 Purchase Order string

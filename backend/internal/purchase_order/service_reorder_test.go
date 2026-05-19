@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gablelbm/gable/internal/product"
+	"github.com/futurebuildai/gablexhardscape/internal/product"
 	"github.com/google/uuid"
 )
 

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gablelbm/gable/pkg/httputil"
+	"github.com/futurebuildai/gablexhardscape/pkg/httputil"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )

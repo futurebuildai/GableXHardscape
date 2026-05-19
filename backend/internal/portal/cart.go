@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/gablelbm/gable/internal/customer"
-	"github.com/gablelbm/gable/internal/order"
+	"github.com/futurebuildai/gablexhardscape/internal/customer"
+	"github.com/futurebuildai/gablexhardscape/internal/order"
 	"github.com/google/uuid"
 )
 

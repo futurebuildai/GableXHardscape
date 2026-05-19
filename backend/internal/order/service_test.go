@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/gablelbm/gable/internal/config"
-	"github.com/gablelbm/gable/internal/customer"
-	"github.com/gablelbm/gable/internal/order"
-	"github.com/gablelbm/gable/internal/purchase_order"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/internal/config"
+	"github.com/futurebuildai/gablexhardscape/internal/customer"
+	"github.com/futurebuildai/gablexhardscape/internal/order"
+	"github.com/futurebuildai/gablexhardscape/internal/purchase_order"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 

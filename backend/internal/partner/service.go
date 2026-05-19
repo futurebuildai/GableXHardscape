@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/gablelbm/gable/internal/customer"
-	"github.com/gablelbm/gable/internal/quote"
+	"github.com/futurebuildai/gablexhardscape/internal/customer"
+	"github.com/futurebuildai/gablexhardscape/internal/quote"
 	"github.com/google/uuid"
 )
 

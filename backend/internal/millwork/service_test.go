@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gablelbm/gable/internal/config"
-	"github.com/gablelbm/gable/internal/millwork"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/internal/config"
+	"github.com/futurebuildai/gablexhardscape/internal/millwork"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	// Start with testify if available, otherwise switch to stdlib
 )
 

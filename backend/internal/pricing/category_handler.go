@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gablelbm/gable/internal/customer"
-	"github.com/gablelbm/gable/pkg/httputil"
+	"github.com/futurebuildai/gablexhardscape/internal/customer"
+	"github.com/futurebuildai/gablexhardscape/pkg/httputil"
 	"github.com/google/uuid"
 )
 

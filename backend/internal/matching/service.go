@@ -7,9 +7,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/gablelbm/gable/internal/ap"
-	"github.com/gablelbm/gable/internal/purchase_order"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/internal/ap"
+	"github.com/futurebuildai/gablexhardscape/internal/purchase_order"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 

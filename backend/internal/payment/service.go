@@ -6,10 +6,10 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/gablelbm/gable/internal/account"
-	"github.com/gablelbm/gable/internal/invoice"
-	"github.com/gablelbm/gable/pkg/audit"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/internal/account"
+	"github.com/futurebuildai/gablexhardscape/internal/invoice"
+	"github.com/futurebuildai/gablexhardscape/pkg/audit"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 

@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/gablelbm/gable/pkg/httputil"
+	"github.com/futurebuildai/gablexhardscape/pkg/httputil"
 )
 
 // Handler provides HTTP handlers for dashboard endpoints.

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 

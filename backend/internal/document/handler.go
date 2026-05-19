@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/gablelbm/gable/internal/customer"
-	"github.com/gablelbm/gable/internal/invoice"
-	"github.com/gablelbm/gable/internal/notification"
-	"github.com/gablelbm/gable/internal/order"
-	"github.com/gablelbm/gable/pkg/httputil"
+	"github.com/futurebuildai/gablexhardscape/internal/customer"
+	"github.com/futurebuildai/gablexhardscape/internal/invoice"
+	"github.com/futurebuildai/gablexhardscape/internal/notification"
+	"github.com/futurebuildai/gablexhardscape/internal/order"
+	"github.com/futurebuildai/gablexhardscape/pkg/httputil"
 	"github.com/google/uuid"
 )
 

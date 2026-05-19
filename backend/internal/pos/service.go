@@ -7,11 +7,11 @@ import (
 	"math"
 	"time"
 
-	"github.com/gablelbm/gable/internal/inventory"
-	"github.com/gablelbm/gable/internal/invoice"
-	"github.com/gablelbm/gable/internal/payment"
-	"github.com/gablelbm/gable/internal/product"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/internal/inventory"
+	"github.com/futurebuildai/gablexhardscape/internal/invoice"
+	"github.com/futurebuildai/gablexhardscape/internal/payment"
+	"github.com/futurebuildai/gablexhardscape/internal/product"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 

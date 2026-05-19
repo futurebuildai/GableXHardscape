@@ -3,7 +3,7 @@ package gl
 import (
 	"context"
 
-	"github.com/gablelbm/gable/internal/domain"
+	"github.com/futurebuildai/gablexhardscape/internal/domain"
 )
 
 // GLAdapter defines the interface for interacting with external accounting systems

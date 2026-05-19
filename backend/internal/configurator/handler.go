@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gablelbm/gable/pkg/httputil"
+	"github.com/futurebuildai/gablexhardscape/pkg/httputil"
 )
 
 type Handler struct {

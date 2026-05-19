@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/gablelbm/gable/internal/domain"
+	"github.com/futurebuildai/gablexhardscape/internal/domain"
 )
 
 type MockGLAdapter struct{}

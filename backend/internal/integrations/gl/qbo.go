@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gablelbm/gable/internal/domain"
+	"github.com/futurebuildai/gablexhardscape/internal/domain"
 )
 
 type QuickBooksOnlineAdapter struct {

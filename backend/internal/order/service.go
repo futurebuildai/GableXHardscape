@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/gablelbm/gable/internal/customer"
-	"github.com/gablelbm/gable/internal/inventory"
-	"github.com/gablelbm/gable/internal/invoice"
-	"github.com/gablelbm/gable/internal/purchase_order"
-	"github.com/gablelbm/gable/pkg/audit"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/internal/customer"
+	"github.com/futurebuildai/gablexhardscape/internal/inventory"
+	"github.com/futurebuildai/gablexhardscape/internal/invoice"
+	"github.com/futurebuildai/gablexhardscape/internal/purchase_order"
+	"github.com/futurebuildai/gablexhardscape/pkg/audit"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 

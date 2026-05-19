@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gablelbm/gable/internal/ai"
-	"github.com/gablelbm/gable/internal/domain"
-	"github.com/gablelbm/gable/internal/edi"
-	"github.com/gablelbm/gable/internal/inventory"
-	"github.com/gablelbm/gable/internal/product"
-	"github.com/gablelbm/gable/internal/vendor"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/internal/ai"
+	"github.com/futurebuildai/gablexhardscape/internal/domain"
+	"github.com/futurebuildai/gablexhardscape/internal/edi"
+	"github.com/futurebuildai/gablexhardscape/internal/inventory"
+	"github.com/futurebuildai/gablexhardscape/internal/product"
+	"github.com/futurebuildai/gablexhardscape/internal/vendor"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 

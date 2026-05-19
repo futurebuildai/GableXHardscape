@@ -6,9 +6,9 @@ import (
 	"math"
 	"sort"
 
-	"github.com/gablelbm/gable/internal/inventory"
-	"github.com/gablelbm/gable/internal/product"
-	"github.com/gablelbm/gable/internal/vendor"
+	"github.com/futurebuildai/gablexhardscape/internal/inventory"
+	"github.com/futurebuildai/gablexhardscape/internal/product"
+	"github.com/futurebuildai/gablexhardscape/internal/vendor"
 	"github.com/google/uuid"
 )
 

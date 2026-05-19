@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/gablelbm/gable/internal/gl"
+	"github.com/futurebuildai/gablexhardscape/internal/gl"
 	"github.com/google/uuid"
 )
 

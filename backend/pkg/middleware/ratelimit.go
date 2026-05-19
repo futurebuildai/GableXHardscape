@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gablelbm/gable/pkg/httputil"
+	"github.com/futurebuildai/gablexhardscape/pkg/httputil"
 )
 
 const maxVisitors = 100000

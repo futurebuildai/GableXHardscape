@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/gablelbm/gable/internal/config"
+	"github.com/futurebuildai/gablexhardscape/internal/config"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 

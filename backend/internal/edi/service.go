@@ -9,8 +9,8 @@ import (
 
 	"log/slog"
 
-	"github.com/gablelbm/gable/internal/domain"
-	integration "github.com/gablelbm/gable/internal/integrations/edi/x12"
+	"github.com/futurebuildai/gablexhardscape/internal/domain"
+	integration "github.com/futurebuildai/gablexhardscape/internal/integrations/edi/x12"
 	// purchase_order import removed
 )
 

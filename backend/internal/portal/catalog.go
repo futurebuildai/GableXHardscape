@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gablelbm/gable/internal/customer"
-	"github.com/gablelbm/gable/internal/inventory"
-	"github.com/gablelbm/gable/internal/pricing"
-	"github.com/gablelbm/gable/internal/product"
+	"github.com/futurebuildai/gablexhardscape/internal/customer"
+	"github.com/futurebuildai/gablexhardscape/internal/inventory"
+	"github.com/futurebuildai/gablexhardscape/internal/pricing"
+	"github.com/futurebuildai/gablexhardscape/internal/product"
 	"github.com/google/uuid"
 )
 

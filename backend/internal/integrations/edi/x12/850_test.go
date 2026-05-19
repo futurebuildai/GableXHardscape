@@ -3,7 +3,7 @@ package x12
 import (
 	"testing"
 
-	"github.com/gablelbm/gable/internal/domain"
+	"github.com/futurebuildai/gablexhardscape/internal/domain"
 	"github.com/google/uuid"
 )
 

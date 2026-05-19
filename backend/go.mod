@@ -1,4 +1,4 @@
-module github.com/gablelbm/gable
+module github.com/futurebuildai/gablexhardscape
 
 go 1.25.0
 

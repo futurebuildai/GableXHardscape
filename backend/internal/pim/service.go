@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gablelbm/gable/internal/ai"
-	"github.com/gablelbm/gable/internal/product"
+	"github.com/futurebuildai/gablexhardscape/internal/ai"
+	"github.com/futurebuildai/gablexhardscape/internal/product"
 	"github.com/google/uuid"
 )
 

@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/gablelbm/gable/pkg/database"
-	"github.com/gablelbm/gable/pkg/middleware"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/pkg/middleware"
 	"github.com/google/uuid"
 )
 

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gablelbm/gable/internal/customer"
-	"github.com/gablelbm/gable/internal/invoice"
-	"github.com/gablelbm/gable/internal/order"
-	"github.com/gablelbm/gable/internal/product"
+	"github.com/futurebuildai/gablexhardscape/internal/customer"
+	"github.com/futurebuildai/gablexhardscape/internal/invoice"
+	"github.com/futurebuildai/gablexhardscape/internal/order"
+	"github.com/futurebuildai/gablexhardscape/internal/product"
 
 	"github.com/johnfercher/maroto/v2"
 	"github.com/johnfercher/maroto/v2/pkg/components/text"

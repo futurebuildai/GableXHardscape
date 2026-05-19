@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gablelbm/gable/pkg/branchctx"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/pkg/branchctx"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 

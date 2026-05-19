@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gablelbm/gable/internal/vendor"
+	"github.com/futurebuildai/gablexhardscape/internal/vendor"
 	"github.com/google/uuid"
 )
 

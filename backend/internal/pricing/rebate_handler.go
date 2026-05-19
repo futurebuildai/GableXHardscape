@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gablelbm/gable/pkg/httputil"
+	"github.com/futurebuildai/gablexhardscape/pkg/httputil"
 	"github.com/google/uuid"
 )
 

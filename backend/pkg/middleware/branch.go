@@ -11,9 +11,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/gablelbm/gable/pkg/branchctx"
-	"github.com/gablelbm/gable/pkg/database"
-	"github.com/gablelbm/gable/pkg/httputil"
+	"github.com/futurebuildai/gablexhardscape/pkg/branchctx"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/pkg/httputil"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )

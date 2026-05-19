@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/gablelbm/gable/pkg/httputil"
-	"github.com/gablelbm/gable/pkg/middleware"
+	"github.com/futurebuildai/gablexhardscape/pkg/httputil"
+	"github.com/futurebuildai/gablexhardscape/pkg/middleware"
 	"github.com/google/uuid"
 )
 

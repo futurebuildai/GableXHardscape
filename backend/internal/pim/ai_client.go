@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gablelbm/gable/internal/ai"
+	"github.com/futurebuildai/gablexhardscape/internal/ai"
 )
 
 // TextAIClient calls the Anthropic Messages API for text generation

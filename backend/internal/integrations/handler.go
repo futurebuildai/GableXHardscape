@@ -10,12 +10,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gablelbm/gable/internal/customer"
-	"github.com/gablelbm/gable/internal/order"
-	"github.com/gablelbm/gable/internal/pricing"
-	"github.com/gablelbm/gable/internal/product"
-	"github.com/gablelbm/gable/internal/quote"
-	"github.com/gablelbm/gable/pkg/database"
+	"github.com/futurebuildai/gablexhardscape/internal/customer"
+	"github.com/futurebuildai/gablexhardscape/internal/order"
+	"github.com/futurebuildai/gablexhardscape/internal/pricing"
+	"github.com/futurebuildai/gablexhardscape/internal/product"
+	"github.com/futurebuildai/gablexhardscape/internal/quote"
+	"github.com/futurebuildai/gablexhardscape/pkg/database"
 	"github.com/google/uuid"
 )
 
