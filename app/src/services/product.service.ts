@@ -3,13 +3,28 @@ import { fetchWithAuth } from './fetchClient';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
+/**
+ * Backend list endpoints return a paginated envelope:
+ *   { data: Product[], total, limit, offset }
+ * The service unwraps `.data` so callers can stay typed against Product[].
+ * A defensive Array.isArray fallback covers any endpoint that returns the
+ * array bare (legacy) or any future shape change.
+ */
+function unwrapList<T>(raw: unknown): T[] {
+    if (Array.isArray(raw)) return raw as T[];
+    if (raw && typeof raw === 'object' && Array.isArray((raw as { data?: unknown }).data)) {
+        return (raw as { data: T[] }).data;
+    }
+    return [];
+}
+
 export const ProductService = {
     async getProducts(): Promise<Product[]> {
         const response = await fetchWithAuth(`${API_URL}/api/v1/products`);
         if (!response.ok) {
             throw new Error('Failed to fetch products');
         }
-        return response.json();
+        return unwrapList<Product>(await response.json());
     },
 
     async createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product> {
