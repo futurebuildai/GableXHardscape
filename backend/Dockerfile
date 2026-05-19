@@ -49,4 +49,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8080/healthz/live || exit 1
 
 # Command to run the executable
-CMD ["sh", "-c", "./migrate && exec ./main"]
+CMD ["./main"]
