@@ -1,0 +1,7 @@
+generated_at=2026-05-20 21:09 UTC
+branch=feature/a20-internal-permissions
+migration_count=81
+module_count=40
+handler_count=35
+page_count=85
+component_count=46

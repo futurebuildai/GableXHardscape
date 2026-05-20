@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GableLBM — Architecture Wiki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #0A0B10;
+  --card: #161821;
+  --green: #00FFA3;
+  --red: #F43F5E;
+  --blue: #38BDF8;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: rgba(255,255,255,0.1);
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-ui); font-size: 14px; line-height: 1.7;
+  padding: 0 0 80px;
+}
+header {
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 20px 40px; display: flex; align-items: center; gap: 16px;
+}
+header .logo { color: var(--green); font-weight: 700; font-size: 18px; letter-spacing: -0.5px; }
+header .badge { background: rgba(0,255,163,0.1); color: var(--green);
+  font-size: 11px; padding: 2px 8px; border-radius: 999px; font-family: var(--font-mono); }
+header .ts { color: var(--muted); font-size: 12px; margin-left: auto; font-family: var(--font-mono); }
+main { max-width: 1200px; margin: 40px auto; padding: 0 40px; }
+h1 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+h2 { font-size: 18px; font-weight: 600; color: var(--green); margin: 40px 0 16px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+h3 { font-size: 15px; font-weight: 600; color: var(--blue); margin: 24px 0 12px; }
+h4 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 16px 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+p { margin: 8px 0; color: var(--text); }
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+thead { background: rgba(255,255,255,0.04); }
+th { padding: 10px 12px; text-align: left; color: var(--muted); font-weight: 600;
+  border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: top; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+code { font-family: var(--font-mono); font-size: 12px;
+  background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 3px; }
+pre { background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  padding: 16px; overflow-x: auto; margin: 12px 0; }
+pre code { background: none; padding: 0; font-size: 13px; }
+blockquote { border-left: 3px solid var(--green); padding-left: 16px; color: var(--muted);
+  margin: 16px 0; font-style: italic; }
+ul, ol { padding-left: 20px; margin: 8px 0; }
+li { margin: 4px 0; }
+strong { color: #fff; font-weight: 600; }
+.pill { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 999px; font-weight: 600; }
+.pill.green { background: rgba(0,255,163,0.1); color: var(--green); }
+.pill.red { background: rgba(244,63,94,0.1); color: var(--red); }
+.pill.blue { background: rgba(56,189,248,0.1); color: var(--blue); }
+footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 60px;
+  padding-top: 24px; border-top: 1px solid var(--border); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+  <header>
+    <span class="logo">GableLBM ERP</span>
+    <span class="badge">Architecture Wiki</span>
+    <span class="ts">Auto-generated · 2026-05-20 21:09 UTC</span>
+  </header>
+  <main>
+    <h1>GableLBM Architecture — Auto-Refreshed Inventory</h1>
+<blockquote>
+<p><strong>Generated:</strong> 2026-05-20 · Branch: <code>feature/a20-internal-permissions</code></p>
+<p><strong>Scanner:</strong> wiki-refresh workflow · Do not edit by hand — re-run <code>/wiki-refresh</code> to update.</p>
+</blockquote>
+
+<hr>
+
+<h2>1. System Principles</h2>
+
+<table>
+<thead><tr><th>Principle</th><th>Detail</th></tr></thead><tbody>
+<tr><td><strong>Modular Monolith</strong></td><td>Single deployment binary; internally strictly decoupled packages</td></tr>
+<tr><td><strong>Zero-Trust Modules</strong></td><td>Modules never access another module's database tables directly</td></tr>
+<tr><td><strong>Interface-Driven Interop</strong></td><td>All cross-module calls go through Go interface contracts</td></tr>
+<tr><td><strong>Event-Driven Side Effects</strong></td><td>Write side-effects flow via NATS JetStream subjects (aspirational; see §4)</td></tr>
+<tr><td><strong>Light DOM Frontend</strong></td><td>All Lit 3 components use <code>createRenderRoot() { return this; }</code> for Tailwind class inheritance</td></tr>
+<tr><td><strong>Federated Governance</strong></td><td>Co-op partners can propose changes via the RFC / Governance portal</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>2. Technology Stack</h2>
+
+<h3>Backend</h3>
+<table>
+<thead><tr><th>Layer</th><th>Technology</th><th>Version</th><th>Notes</th></tr></thead><tbody>
+<tr><td>Language</td><td>Go</td><td>1.25+</td><td><code>go.mod</code> constraint</td></tr>
+<tr><td>HTTP Router</td><td>Chi</td><td>v5</td><td>Middleware-first; all routes at <code>/api/v1/*</code></td></tr>
+<tr><td>Database</td><td>PostgreSQL</td><td>16+</td><td>Extensions: <code>pgvector</code> (AI), <code>postgis</code> (GIS/delivery)</td></tr>
+<tr><td>DB Driver</td><td>pgx</td><td>v5</td><td><code>database/sql</code>-compatible</td></tr>
+<tr><td>Messaging</td><td>NATS JetStream</td><td>embedded</td><td>Container in <code>docker-compose.yml</code>; <strong>not yet wired in Go code</strong> — all inter-module writes are synchronous Go interface calls; NATS sections in this doc are forward-looking design</td></tr>
+<tr><td>Auth</td><td>JWT + JWKS</td><td>—</td><td>Keycloak-compatible; <code>godotenv</code> config fallback</td></tr>
+</tbody></table>
+
+<h3>Frontend</h3>
+<table>
+<thead><tr><th>Layer</th><th>Technology</th><th>Version</th><th>Notes</th></tr></thead><tbody>
+<tr><td>Component Framework</td><td>Lit 3 Web Components</td><td>3.x</td><td>Light DOM mandatory</td></tr>
+<tr><td>Language</td><td>TypeScript</td><td>5.9</td><td>Strict mode</td></tr>
+<tr><td>Bundler</td><td>Vite</td><td>7</td><td>Dev server + production build</td></tr>
+<tr><td>Styling</td><td>Tailwind CSS</td><td>3.4</td><td>Design tokens; no Shadcn</td></tr>
+<tr><td>Charts</td><td>Chart.js</td><td>4</td><td>Revenue trend, order status</td></tr>
+<tr><td>Maps</td><td>Leaflet</td><td>—</td><td>Route / delivery maps</td></tr>
+</tbody></table>
+
+<h3>Infrastructure (Non-Production)</h3>
+<table>
+<thead><tr><th>Environment</th><th>Host</th><th>Branch</th><th>URL</th><th>Logical DB</th></tr></thead><tbody>
+<tr><td>Demo</td><td>Digital Ocean App Platform</td><td><code>community</code></td><td>https://demo.gablelbm.com</td><td><code>gable_demo</code></td></tr>
+<tr><td>Staging</td><td>Digital Ocean App Platform</td><td><code>staging</code></td><td>https://staging.gablelbm.com</td><td><code>gable_staging</code></td></tr>
+</tbody></table>
+
+<p>Production (<code>master</code>) is not managed by this repository. App specs: <code>.do/app-demo.yaml</code>, <code>.do/app-staging.yaml</code>.</p>
+
+<hr>
+
+<h2>3. Backend Module Inventory</h2>
+
+<p><strong>Total modules with HTTP handlers: 35</strong> · <strong>Total migrations: 81</strong></p>
+
+<table>
+<thead><tr><th>Module</th><th>Package</th><th>Handler</th><th>Responsibility</th></tr></thead><tbody>
+<tr><td>Account</td><td><code>internal/account</code></td><td>✅</td><td>Customer accounts, credit limits, account rules</td></tr>
+<tr><td>AI</td><td><code>internal/ai</code></td><td>—</td><td>AI orchestration, embedding pipelines</td></tr>
+<tr><td>Accounts Payable</td><td><code>internal/ap</code></td><td>✅</td><td>Vendor invoices, AP workflows, remittance</td></tr>
+<tr><td>Bank Reconciliation</td><td><code>internal/bankrecon</code></td><td>✅</td><td>Bank statement import, reconciliation matching</td></tr>
+<tr><td>Config</td><td><code>internal/config</code></td><td>—</td><td>Environment config, feature flags</td></tr>
+<tr><td>Configurator</td><td><code>internal/configurator</code></td><td>✅</td><td>Millwork door/product configurator rules</td></tr>
+<tr><td>CRM</td><td><code>internal/crm</code></td><td>✅</td><td>Activity logging, contact management</td></tr>
+<tr><td>Customer</td><td><code>internal/customer</code></td><td>✅</td><td>Customer CRUD, branch access, statements</td></tr>
+<tr><td>Dashboard</td><td><code>internal/dashboard</code></td><td>✅</td><td>KPIs, revenue trends, alert widgets</td></tr>
+<tr><td>Delivery</td><td><code>internal/delivery</code></td><td>✅</td><td>Dispatch board, routes, driver app</td></tr>
+<tr><td>Document</td><td><code>internal/document</code></td><td>✅</td><td>Document storage, lien notices, PDF generation</td></tr>
+<tr><td>Domain</td><td><code>internal/domain</code></td><td>—</td><td>Shared domain types (no HTTP exposure)</td></tr>
+<tr><td>EDI</td><td><code>internal/edi</code></td><td>—</td><td>Electronic data interchange adapters</td></tr>
+<tr><td>General Ledger</td><td><code>internal/gl</code></td><td>✅</td><td>Double-entry GL, journal entries, fiscal periods, trial balance, financial statements</td></tr>
+<tr><td>Governance</td><td><code>internal/governance</code></td><td>✅</td><td>RFC portal, AI governance engine, backlog orchestrator</td></tr>
+<tr><td>Integrations</td><td><code>internal/integrations</code></td><td>✅</td><td>BisTrack, Spruce, DMSi sync adapters</td></tr>
+<tr><td>Inventory</td><td><code>internal/inventory</code></td><td>✅</td><td>Stock quants, moves, cycle counts, UOM conversions</td></tr>
+<tr><td>Invoice</td><td><code>internal/invoice</code></td><td>✅</td><td>AR invoices, payment terms, credit notes</td></tr>
+<tr><td>Location</td><td><code>internal/location</code></td><td>✅</td><td>Branches, bins, staff roles + approval requests</td></tr>
+<tr><td>Matching</td><td><code>internal/matching</code></td><td>✅</td><td>PO–invoice 3-way matching</td></tr>
+<tr><td>Millwork</td><td><code>internal/millwork</code></td><td>✅</td><td>Millwork product configuration, cut lists</td></tr>
+<tr><td>Notification</td><td><code>internal/notification</code></td><td>—</td><td>In-app and email notification dispatch</td></tr>
+<tr><td>Order</td><td><code>internal/order</code></td><td>✅</td><td>Sales orders, line items, order lifecycle</td></tr>
+<tr><td>Parsing</td><td><code>internal/parsing</code></td><td>✅</td><td>Material list OCR/AI parsing</td></tr>
+<tr><td>Partner</td><td><code>internal/partner</code></td><td>✅</td><td>Co-op partner portal, federated catalog</td></tr>
+<tr><td>Payment</td><td><code>internal/payment</code></td><td>✅</td><td>Payment processing, AR application, AR aging</td></tr>
+<tr><td>PIM</td><td><code>internal/pim</code></td><td>✅</td><td>AI-powered product content, images, descriptions</td></tr>
+<tr><td>Portal</td><td><code>internal/portal</code></td><td>✅</td><td>B2B dealer portal (ordering, team management)</td></tr>
+<tr><td>POS</td><td><code>internal/pos</code></td><td>✅</td><td>Point-of-sale terminal, till management</td></tr>
+<tr><td>Pricing</td><td><code>internal/pricing</code></td><td>✅</td><td>Price matrix, account rules, category tree, escalators</td></tr>
+<tr><td>Product</td><td><code>internal/product</code></td><td>✅</td><td>Product catalog, SKUs, categories, hardscape model</td></tr>
+<tr><td>Project</td><td><code>internal/project</code></td><td>✅</td><td>Project tracking, job costing</td></tr>
+<tr><td>Purchase Order</td><td><code>internal/purchase_order</code></td><td>✅</td><td>PO creation, receiving, vendor management</td></tr>
+<tr><td>Quote</td><td><code>internal/quote</code></td><td>✅</td><td>Quote builder, analytics, escalator rules</td></tr>
+<tr><td>Reporting</td><td><code>internal/reporting</code></td><td>✅</td><td>Report builder, AR aging, saved reports, customer statements</td></tr>
+<tr><td>Sales Team</td><td><code>internal/salesteam</code></td><td>✅</td><td>Sales team management, territory assignment</td></tr>
+<tr><td>Tax</td><td><code>internal/tax</code></td><td>✅</td><td>HST/GST/PST tax codes, rates, CRA compliance</td></tr>
+<tr><td>Tech Admin</td><td><code>internal/techadmin</code></td><td>✅</td><td>Platform admin, AI key management</td></tr>
+<tr><td>Vendor</td><td><code>internal/vendor</code></td><td>✅</td><td>Vendor master, AP contacts, rebate programs</td></tr>
+<tr><td>Vision</td><td><code>internal/vision</code></td><td>✅</td><td>Computer vision / barcode scanning</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>4. Inter-Module Communication</h2>
+
+<h3>4.1 Synchronous (Reads — Current)</h3>
+<p>Direct Go interface calls within the same process. No network hop.</p>
+
+<pre><code>// Example: Sales checks stock availability
+inventoryService.GetAvailability(sku, locationID) // → AvailabilityResult</code></pre>
+
+<h3>4.2 Asynchronous (Writes — Forward-Looking)</h3>
+<p>NATS JetStream subjects. <strong>Not yet wired in production code.</strong> Current implementation uses synchronous calls for all inter-module writes.</p>
+
+<table>
+<thead><tr><th>Subject</th><th>Publisher</th><th>Subscribers</th></tr></thead><tbody>
+<tr><td><code>sales.order.confirmed</code></td><td>order</td><td>inventory (reserve stock), logistics (pick ticket), invoice (credit check)</td></tr>
+<tr><td><code>ar.invoice.issued</code></td><td>invoice</td><td>gl (auto-post: DR AR / CR Revenue / CR HST)</td></tr>
+<tr><td><code>ar.payment.received</code></td><td>payment</td><td>gl (auto-post: DR Cash / CR AR)</td></tr>
+<tr><td><code>ap.vendor_invoice.approved</code></td><td>ap</td><td>gl (auto-post: DR Inventory / DR HST / CR AP)</td></tr>
+<tr><td><code>ap.vendor_payment.issued</code></td><td>ap</td><td>gl (auto-post: DR AP / CR Cash)</td></tr>
+<tr><td><code>pos.till.closed</code></td><td>pos</td><td>gl (auto-post: DR Cash+Card / CR Revenue / CR HST)</td></tr>
+<tr><td><code>gl.period.reopen_requested</code></td><td>gl</td><td>notification (admin bell → period approval)</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>5. Database Schema Inventory</h2>
+
+<p><strong>Total migrations applied: 81</strong> (through <code>079_staff_roles_and_approval_requests.sql</code>)</p>
+
+<table>
+<thead><tr><th>Migration Range</th><th>Area</th><th>Key Tables Added</th></tr></thead><tbody>
+<tr><td>001–020</td><td>Core foundation</td><td><code>products</code>, <code>uoms</code>, <code>locations</code>, <code>stock_quants</code>, <code>inventory_moves</code>, <code>customers</code>, <code>orders</code>, <code>invoices</code>, <code>payments</code>, <code>vendors</code>, <code>purchase_orders</code></td></tr>
+<tr><td>021–040</td><td>Sales & pricing</td><td><code>quotes</code>, <code>price_levels</code>, <code>pricing_rules</code>, <code>price_matrix</code>, <code>account_rules</code>, <code>delivery_routes</code>, <code>dispatch</code></td></tr>
+<tr><td>041–060</td><td>Operations</td><td><code>pos_sessions</code>, <code>tills</code>, <code>barcode_scans</code>, <code>crm_activities</code>, <code>projects</code>, <code>lien_notices</code></td></tr>
+<tr><td>061–070</td><td>Multi-branch</td><td><code>branch_users</code>, <code>orders.branch_id</code>, <code>quotes.branch_id</code>, <code>invoices.branch_id</code>, <code>po.branch_id</code>, <code>pos.branch_id</code>, <code>customers.branch_id</code></td></tr>
+<tr><td>071–077</td><td>LBM expansion</td><td><code>hardscape_products</code>, <code>uom_expansion</code> (lineal ft, sq ft, bd ft, ton), <code>hardscape_configurator_rules</code>, <code>bistrack_sync</code></td></tr>
+<tr><td>075</td><td>Dibbits seed</td><td>Trenton + Kingston branch data, Dibbits product categories</td></tr>
+<tr><td>025</td><td>General Ledger</td><td><code>gl_accounts</code> (COA seed: 16 LBM accounts), <code>gl_fiscal_periods</code>, <code>gl_journal_entries</code>, <code>gl_journal_lines</code></td></tr>
+<tr><td>078</td><td>Replenishment</td><td><code>replenishment_settings</code> (planned: GL gap closure — see A-01 execution plan)</td></tr>
+<tr><td>079</td><td>Staff Roles</td><td><code>staff_roles</code>, <code>approval_requests</code> (A-20: internal permission model)</td></tr>
+</tbody></table>
+
+<blockquote>
+<p><strong>Next migration:</strong> <code>078_gl_gap_closure.sql</code> — adds <code>gl_period_overrides</code>, <code>gl_audit_log</code>, covering index (per A-01 execution plan)</p>
+</blockquote>
+
+<hr>
+
+<h2>6. API Surface</h2>
+
+<p><strong>Base URL:</strong> <code>/api/v1/</code></p>
+<p><strong>Auth:</strong> <code>Authorization: Bearer &lt;JWT&gt;</code> (JWKS-validated)</p>
+<p><strong>Format:</strong> JSON request/response; standard error envelope <code>{ &quot;error&quot;: { &quot;code&quot;: &quot;...&quot;, &quot;message&quot;: &quot;...&quot; } }</code></p>
+
+<table>
+<thead><tr><th>Module</th><th>Route Prefix</th><th>Notable Endpoints</th></tr></thead><tbody>
+<tr><td>Account</td><td><code>/accounts</code></td><td>CRUD, credit limit, rules</td></tr>
+<tr><td>AP</td><td><code>/ap</code></td><td>Vendor invoices, payment runs</td></tr>
+<tr><td>Bank Recon</td><td><code>/bankrecon</code></td><td>Statement upload, match, reconcile</td></tr>
+<tr><td>Configurator</td><td><code>/configurator</code></td><td>Product configuration rules</td></tr>
+<tr><td>CRM</td><td><code>/crm</code></td><td>Activity log, contact timeline</td></tr>
+<tr><td>Customer</td><td><code>/customers</code></td><td>CRUD, statement, branch access</td></tr>
+<tr><td>Dashboard</td><td><code>/dashboard</code></td><td>KPIs, revenue trend, alerts</td></tr>
+<tr><td>Delivery</td><td><code>/delivery</code></td><td>Routes, dispatch board, driver app</td></tr>
+<tr><td>General Ledger</td><td><code>/gl</code></td><td>Accounts, journal entries, fiscal periods, trial balance, balance sheet, P&L, audit log</td></tr>
+<tr><td>Governance</td><td><code>/governance</code></td><td>RFCs, voting, backlog</td></tr>
+<tr><td>Integrations</td><td><code>/integrations</code></td><td>BisTrack/Spruce/DMSi sync</td></tr>
+<tr><td>Inventory</td><td><code>/inventory</code></td><td>Stock, moves, cycle counts</td></tr>
+<tr><td>Invoice</td><td><code>/invoices</code></td><td>AR invoices, credit notes</td></tr>
+<tr><td>Location</td><td><code>/locations</code></td><td>Branches, bins, staff roles, approvals</td></tr>
+<tr><td>Matching</td><td><code>/matching</code></td><td>3-way PO match</td></tr>
+<tr><td>Millwork</td><td><code>/millwork</code></td><td>Millwork config, cut lists</td></tr>
+<tr><td>Order</td><td><code>/orders</code></td><td>Sales order lifecycle</td></tr>
+<tr><td>Parsing</td><td><code>/parsing</code></td><td>Material list AI parse</td></tr>
+<tr><td>Partner</td><td><code>/partner</code></td><td>Federated catalog, co-op portal</td></tr>
+<tr><td>Payment</td><td><code>/payments</code></td><td>AR payment application</td></tr>
+<tr><td>PIM</td><td><code>/pim</code></td><td>AI product content</td></tr>
+<tr><td>Portal</td><td><code>/portal</code></td><td>B2B ordering, team, cart</td></tr>
+<tr><td>POS</td><td><code>/pos</code></td><td>Terminal, till session, closeout</td></tr>
+<tr><td>Pricing</td><td><code>/pricing</code></td><td>Matrix, rules, category tree</td></tr>
+<tr><td>Product</td><td><code>/products</code></td><td>Catalog, SKU, hardscape</td></tr>
+<tr><td>Project</td><td><code>/projects</code></td><td>Job tracking, costing</td></tr>
+<tr><td>Purchase Order</td><td><code>/purchase-orders</code></td><td>PO lifecycle, receiving</td></tr>
+<tr><td>Quote</td><td><code>/quotes</code></td><td>Builder, analytics, escalators</td></tr>
+<tr><td>Reporting</td><td><code>/reports</code></td><td>AR aging, report builder, statements</td></tr>
+<tr><td>Sales Team</td><td><code>/salesteam</code></td><td>Team management</td></tr>
+<tr><td>Tax</td><td><code>/tax</code></td><td>HST/GST codes, CRA compliance</td></tr>
+<tr><td>Tech Admin</td><td><code>/techadmin</code></td><td>AI keys, platform config</td></tr>
+<tr><td>Vendor</td><td><code>/vendors</code></td><td>Vendor master, rebates</td></tr>
+<tr><td>Vision</td><td><code>/vision</code></td><td>Barcode scan, computer vision</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>7. Frontend Architecture</h2>
+
+<p><strong>Total TypeScript files: 210</strong> · <strong>Pages: 68</strong> · <strong>Components: 42+</strong></p>
+
+<h3>7.1 App Layouts</h3>
+
+<table>
+<thead><tr><th>Layout</th><th>Component</th><th>Routes</th><th>Target User</th></tr></thead><tbody>
+<tr><td>ERP Desktop</td><td><code>app-shell.ts</code></td><td><code>/erp/*</code></td><td>Staff (Sandra, Ryan, yard team)</td></tr>
+<tr><td>B2B Portal</td><td><code>portal-layout.ts</code></td><td><code>/portal/*</code></td><td>Contractor / dealer customers</td></tr>
+<tr><td>Driver App</td><td><code>driver-layout.ts</code></td><td><code>/driver/*</code></td><td>Delivery drivers (mobile)</td></tr>
+<tr><td>Yard App</td><td><code>yard-layout.ts</code></td><td><code>/yard/*</code></td><td>Yard/warehouse staff</td></tr>
+<tr><td>POS Terminal</td><td>(inline)</td><td><code>/pos</code></td><td>Counter sales staff</td></tr>
+</tbody></table>
+
+<h3>7.2 Page Inventory</h3>
+
+<table>
+<thead><tr><th>Section</th><th>Pages</th></tr></thead><tbody>
+<tr><td><strong>Accounting</strong></td><td><code>BankReconciliation</code>, <code>ChartOfAccounts</code>, <code>JournalEntries</code>, <code>POMatching</code>, <code>TrialBalance</code></td></tr>
+<tr><td><strong>Accounts (CRM)</strong></td><td><code>AccountDetailPage</code>, <code>AccountsPage</code>, <code>ActivityFeed</code>, <code>ContactList</code></td></tr>
+<tr><td><strong>Admin</strong></td><td><code>Branches</code>, <code>BranchUsers</code>, <code>PendingApprovals</code>, <code>StaffManagement</code>, <code>TechAdminPage</code></td></tr>
+<tr><td><strong>Admin / Pricing</strong></td><td><code>AccountRulesTable</code>, <code>CategoryTree</code>, <code>MatrixGrid</code>, <code>PricingMatrix</code>, <code>ResolutionPreview</code>, <code>RuleDrawer</code></td></tr>
+<tr><td><strong>Dashboard</strong></td><td><code>Dashboard</code>, <code>DailyTill</code></td></tr>
+<tr><td><strong>Dispatch</strong></td><td><code>DispatchBoard</code></td></tr>
+<tr><td><strong>Driver</strong></td><td><code>DeliveryDetail</code>, <code>RouteList</code>, <code>StopList</code></td></tr>
+<tr><td><strong>Governance</strong></td><td><code>NewRFC</code>, <code>RFCDashboard</code>, <code>RFCDetail</code></td></tr>
+<tr><td><strong>Inventory</strong></td><td><code>ProductDetail</code>, <code>ProductList</code> <em>(+ yard: <code>InventoryLookup</code>, <code>CycleCount</code>)</em></td></tr>
+<tr><td><strong>Portal (B2B)</strong></td><td><code>PortalHome</code>, <code>PortalMyAccount</code>, <code>PortalOrders</code>, <code>PortalProductDetail</code>, <code>PortalTeam</code></td></tr>
+<tr><td><strong>POS</strong></td><td><code>POSTerminal</code></td></tr>
+<tr><td><strong>Projects</strong></td><td><code>ProjectDashboard</code>, <code>ProjectList</code></td></tr>
+<tr><td><strong>Purchasing</strong></td><td><code>NewPurchaseOrder</code>, <code>ProcurementDashboard</code>, <code>PurchaseOrderDetail</code>, <code>PurchaseOrderList</code>, <code>PurchasingRecommendations</code>, <code>RebatePrograms</code>, <code>RebateReport</code>, <code>ReplenishmentSettings</code>, <code>VendorDetail</code>, <code>VendorList</code></td></tr>
+<tr><td><strong>Quotes</strong></td><td><code>QuoteBuilder</code>, <code>QuoteAnalytics</code>, <code>QuoteDetail</code>, <code>QuoteList</code></td></tr>
+<tr><td><strong>Reports</strong></td><td><code>ARAgingReport</code>, <code>CustomerStatementPage</code>, <code>ReportBuilder</code>, <code>SavedReports</code></td></tr>
+<tr><td><strong>Yard</strong></td><td><code>CycleCount</code>, <code>InventoryLookup</code>, <code>PickDetail</code>, <code>PickQueue</code>, <code>ReceivePO</code></td></tr>
+</tbody></table>
+
+<h3>7.3 Component Inventory</h3>
+
+<table>
+<thead><tr><th>Category</th><th>Components</th></tr></thead><tbody>
+<tr><td><strong>UI Atoms</strong></td><td><code>Button</code>, <code>Card</code>, <code>Tooltip</code>, <code>LoadingScreen</code>, <code>brand-logo</code>, <code>toast-container</code>, <code>shortcuts-modal</code>, <code>omnibar</code></td></tr>
+<tr><td><strong>Layout</strong></td><td><code>app-shell</code>, <code>branch-switcher</code>, <code>portal-layout</code>, <code>driver-layout</code>, <code>yard-layout</code></td></tr>
+<tr><td><strong>Dashboard Widgets</strong></td><td><code>KPICard</code>, <code>RevenueTrendChart</code>, <code>OrderStatusChart</code>, <code>RecentOrdersFeed</code>, <code>TopCustomersTable</code>, <code>InventoryAlertsWidget</code></td></tr>
+<tr><td><strong>Inventory</strong></td><td><code>InventoryTable</code>, <code>AddProductModal</code>, <code>StockAdjustmentModal</code>, <code>InventoryTransferModal</code>, <code>ProductMarginModal</code></td></tr>
+<tr><td><strong>Logistics</strong></td><td><code>DeliveryList</code>, <code>RouteList</code>, <code>RouteMap</code>, <code>AssignOrderModal</code>, <code>CreateRouteModal</code></td></tr>
+<tr><td><strong>Quotes</strong></td><td><code>LineItemEditor</code>, <code>EscalatorToggle</code>, <code>MaterialListUpload</code>, <code>ParsedResultsPanel</code></td></tr>
+<tr><td><strong>Portal</strong></td><td><code>CartSidebar</code>, <code>ProductCard</code></td></tr>
+<tr><td><strong>POS</strong></td><td><code>OfflineBanner</code></td></tr>
+<tr><td><strong>Payments</strong></td><td><code>RunPaymentsForm</code>, <code>PaymentModal</code></td></tr>
+<tr><td><strong>CRM</strong></td><td><code>LogActivityModal</code></td></tr>
+<tr><td><strong>Customers</strong></td><td><code>CustomerSelect</code></td></tr>
+<tr><td><strong>Products</strong></td><td><code>ProductSelect</code></td></tr>
+<tr><td><strong>Location</strong></td><td><code>LocationManager</code></td></tr>
+<tr><td><strong>Common</strong></td><td><code>PermissionFallbackModal</code>, <code>BarcodeScanner</code></td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>8. General Ledger Module (A-01)</h2>
+
+<p>The GL module (<code>internal/gl</code>) is the financial core. It implements a native double-entry bookkeeping engine inside the ERP, eliminating the Dynamics GP integration.</p>
+
+<table>
+<thead><tr><th>Capability</th><th>Status</th></tr></thead><tbody>
+<tr><td>Chart of Accounts (CRUD)</td><td>✅ Schema seeded (16 LBM accounts); API gaps in progress</td></tr>
+<tr><td>Journal Entries (DRAFT→POSTED→VOID)</td><td>✅ Core engine; ~70% complete</td></tr>
+<tr><td>Fiscal Period open/close</td><td>✅ Exists</td></tr>
+<tr><td>Period reopen + admin approval</td><td>🔧 Gap — A-01 execution plan</td></tr>
+<tr><td>Trial Balance compute + CSV export</td><td>✅ Exists</td></tr>
+<tr><td>Balance Sheet</td><td>🔧 Gap — A-01 execution plan</td></tr>
+<tr><td>P&L / Income Statement</td><td>🔧 Gap — A-01 execution plan</td></tr>
+<tr><td>ERP auto-posting (NATS consumer)</td><td>🔧 Gap — A-01 execution plan</td></tr>
+<tr><td>Dashboard financial widget</td><td>🔧 Gap — A-01 execution plan</td></tr>
+<tr><td>GL Audit Log</td><td>🔧 Gap — A-01 execution plan</td></tr>
+</tbody></table>
+
+<p>Full spec: <code>.agents/handoff/features/A-01-native-general-ledger/</code> (21-artifact pipeline complete)</p>
+
+<hr>
+
+<h2>9. Active Feature Work (Current Branch)</h2>
+
+<p><strong>Branch:</strong> <code>feature/a20-internal-permissions</code></p>
+
+<table>
+<thead><tr><th>Feature</th><th>Status</th><th>Key Files</th></tr></thead><tbody>
+<tr><td>A-20: Internal Permission Model</td><td>🔧 In Progress</td><td><code>internal/location/role_model.go</code>, <code>role_repository.go</code>, <code>role_service.go</code>, <code>role_test.go</code>; Migration <code>079_staff_roles_and_approval_requests.sql</code>; <code>app/src/pages/admin/PendingApprovals.ts</code>, <code>StaffManagement.ts</code>, <code>components/common/PermissionFallbackModal.ts</code></td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>10. Design System Reference</h2>
+
+<p><strong>Theme:</strong> Industrial Dark — High Contrast, Data Density, Zero Clutter</p>
+
+<table>
+<thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead><tbody>
+<tr><td>Gable Green</td><td><code>#00FFA3</code></td><td>Primary actions, success states, active glow</td></tr>
+<tr><td>Deep Space</td><td><code>#0A0B10</code></td><td>Global background</td></tr>
+<tr><td>Slate Steel</td><td><code>#161821</code></td><td>Card backgrounds, sidebar, modals</td></tr>
+<tr><td>Safety Red</td><td><code>#F43F5E</code></td><td>Errors, stockouts, credit hold</td></tr>
+<tr><td>Blueprint Blue</td><td><code>#38BDF8</code></td><td>Technical data, dimensions, links</td></tr>
+<tr><td>Glass overlay</td><td><code>rgba(255,255,255,0.05)</code> + <code>backdrop-filter: blur(12px)</code></td><td>Modal overlays, cards</td></tr>
+<tr><td>UI Font</td><td>Inter (400/500/600)</td><td>Labels, headers, body</td></tr>
+<tr><td>Data Font</td><td>JetBrains Mono</td><td>SKUs, prices, quantities, dimensions</td></tr>
+</tbody></table>
+
+<p>Full design system: <code>docs/design-system.md</code></p>
+
+<hr>
+
+<h2>11. Legacy Interop & Migration Strategy</h2>
+
+<table>
+<thead><tr><th>Legacy System</th><th>Adapter Location</th><th>Protocol</th></tr></thead><tbody>
+<tr><td>Epicor BisTrack</td><td><code>internal/integrations</code></td><td>REST JSON</td></tr>
+<tr><td>ECI Spruce</td><td><code>internal/integrations</code></td><td>SOAP XML</td></tr>
+<tr><td>DMSi Agility</td><td><code>internal/integrations</code></td><td>REST JSON</td></tr>
+<tr><td>Dynamics GP (GL)</td><td>Replacing with A-01 native GL</td><td>N/A — full replacement</td></tr>
+</tbody></table>
+
+<p>Sync engine: <code>pkg/sync</code> (bidirectional data flow during phase-in).</p>
+
+  </main>
+  <footer>
+    GableLBM Architecture Wiki · Auto-compiled by wiki-refresh · 2026-05-20 21:09 UTC
+  </footer>
+</body>
+</html>
