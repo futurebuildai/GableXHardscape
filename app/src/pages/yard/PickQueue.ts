@@ -1,4 +1,5 @@
 import { LitElement, html, nothing } from 'lit';
+import { formatCents } from '../../lib/utils.ts';
 import { customElement, state } from 'lit/decorators.js';
 import { icon } from '../../lib/icons.ts';
 import { router } from '../../lib/router.ts';
@@ -90,7 +91,7 @@ export class PickQueue extends LitElement {
                                             ${order.lines?.length || '?'} items
                                         </div>
                                         <div class="text-xs font-mono text-zinc-400">
-                                            $${order.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            ${formatCents(order.total_amount)}
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-1 text-[10px] text-zinc-500">

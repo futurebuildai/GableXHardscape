@@ -295,10 +295,10 @@ func requireAdmin(w http.ResponseWriter, r *http.Request) bool {
 func (h *Handler) HandleListCatalog(w http.ResponseWriter, r *http.Request) {
 	customerID := getPortalCustomerID(r)
 	filter := CatalogFilter{
-		Query:    r.URL.Query().Get("q"),
-		Category: r.URL.Query().Get("category"),
-		Species:  r.URL.Query().Get("species"),
-		Grade:    r.URL.Query().Get("grade"),
+		Query:        r.URL.Query().Get("q"),
+		Category:     r.URL.Query().Get("category"),
+		Manufacturer: r.URL.Query().Get("manufacturer"),
+		Collection:   r.URL.Query().Get("collection"),
 	}
 
 	products, err := h.svc.ListCatalog(r.Context(), customerID, filter)

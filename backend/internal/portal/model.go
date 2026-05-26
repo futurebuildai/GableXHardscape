@@ -140,10 +140,10 @@ type ReorderResponse struct {
 
 // CatalogFilter holds query parameters for catalog browsing.
 type CatalogFilter struct {
-	Query    string `json:"query"`
-	Category string `json:"category"`
-	Species  string `json:"species"`
-	Grade    string `json:"grade"`
+	Query        string `json:"query"`
+	Category     string `json:"category"`
+	Manufacturer string `json:"manufacturer"`
+	Collection   string `json:"collection"`
 }
 
 // CatalogProductDTO is a portal-facing product with customer-specific pricing and availability.
@@ -152,8 +152,8 @@ type CatalogProductDTO struct {
 	SKU           string    `json:"sku"`
 	Name          string    `json:"name"`
 	Category      string    `json:"category"`
-	Species       string    `json:"species"`
-	Grade         string    `json:"grade"`
+	Manufacturer  string    `json:"manufacturer"`
+	Collection    string    `json:"collection"`
 	ImageURL      string    `json:"image_url"`
 	UOM           string    `json:"uom"`
 	BasePrice     float64   `json:"base_price"`

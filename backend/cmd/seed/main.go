@@ -18,6 +18,43 @@ func recentDate(daysBack int) time.Time {
 	return time.Now().AddDate(0, 0, -rand.Intn(daysBack))
 }
 
+// dedupeBranches resets the locations hierarchy when prior seed runs left
+// duplicate BRANCH rows behind. The original upsert relied on
+// `ON CONFLICT (parent_id, code)`, but Postgres treats NULL as distinct in
+// unique indexes — every rerun inserted three fresh branch rows, and each of
+// those grew its own set of zone children, inventory rows, etc. In-place
+// repointing fails because duplicated child zones share a (parent_id, code)
+// constraint with the canonical branch's children.
+//
+// The pragmatic recovery on a demo database is to nuke `locations` CASCADE
+// when duplication is detected. Every location-dependent table is fully
+// rebuilt by the rest of this seed in the same run, so the demo data lands
+// exactly as if this were a brand-new database. Clean databases skip it.
+func dedupeBranches(db *sql.DB) {
+	// Drop the stale pre-Kelowna placeholder if present.
+	if _, err := db.Exec(`DELETE FROM locations WHERE type='BRANCH' AND code='MAIN' AND name='Main Branch'`); err != nil {
+		log.Printf("dedupeBranches: drop legacy MAIN: %v", err)
+	}
+
+	var total, distinct int
+	if err := db.QueryRow(`SELECT COUNT(*), COUNT(DISTINCT code) FROM locations WHERE type='BRANCH'`).Scan(&total, &distinct); err != nil {
+		log.Printf("dedupeBranches: count: %v", err)
+		return
+	}
+	if total <= distinct {
+		return
+	}
+	log.Printf("Seed: dedupeBranches detected %d duplicate BRANCH rows; truncating locations CASCADE", total-distinct)
+	if _, err := db.Exec(`TRUNCATE locations CASCADE`); err != nil {
+		log.Printf("dedupeBranches: TRUNCATE locations CASCADE: %v", err)
+		return
+	}
+	if _, err := db.Exec(`DELETE FROM system_settings WHERE key='default_branch_id'`); err != nil {
+		log.Printf("dedupeBranches: clear default_branch_id setting: %v", err)
+	}
+	log.Printf("Seed: dedupeBranches reset; downstream steps will rebuild location-dependent tables")
+}
+
 func main() {
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
@@ -35,6 +72,21 @@ func main() {
 	}
 
 	demoUserID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
+
+	isDibbits := false
+	for _, arg := range os.Args {
+		if arg == "--dibbits" {
+			isDibbits = true
+		}
+	}
+
+	if isDibbits {
+		log.Println("Seeding started — Dibbits Hardscape (Ontario)...")
+		log.Println("  Skipping LBM specific seed since Dibbits static data is handled by migrations 080-082.")
+		log.Println("  SEED COMPLETE — GableXHardscape OS")
+		return
+	}
+
 	log.Println("Seeding started — Gable Lumber & Supply (Kelowna, BC)...")
 
 	// =========================================================================
@@ -52,20 +104,45 @@ func main() {
 		{"WK", "West Kelowna Satellite", "2475 Dobbin Rd", "West Kelowna", "BC", "V4T 2E9", "250-555-1100", "BC", 0.12},
 		{"LK", "Lake Country Outpost", "11852 Highway 97", "Lake Country", "BC", "V4V 1E2", "250-555-1200", "BC", 0.12},
 	}
+	// One-time cleanup: previous seed runs created duplicate BRANCH rows because
+	// Postgres treats NULL parent_id as distinct in unique constraints. Pick the
+	// canonical (oldest) branch per code, repoint any descendants / inventory /
+	// stock_moves / orders / settings to it, then drop the dupes. Also drop any
+	// stale legacy "MAIN" branch from pre-Kelowna seed runs.
+	//
+	// We do this inside the seed (rather than as a migration) so existing demo
+	// databases self-heal on the next deploy without manual psql intervention.
+	dedupeBranches(db)
+
+	// Idempotent branch upsert. We can't rely on ON CONFLICT (parent_id, code)
+	// because parent_id is NULL for branches and NULL != NULL in unique indexes.
+	// Pre-select instead: if a BRANCH with this code exists, UPDATE it; else INSERT.
 	branchIDs := make(map[string]uuid.UUID)
 	for _, b := range branches {
 		var id string
-		err := db.QueryRow(`INSERT INTO locations
-			(id, code, type, description, path, name, address, city, state, zip, phone, tax_jurisdiction_code, default_tax_rate, timezone, active)
-			VALUES (gen_random_uuid(), $1, 'BRANCH', $2, $1, $2, $3, $4, $5, $6, $7, $8, $9, 'America/Vancouver', TRUE)
-			ON CONFLICT ON CONSTRAINT locations_parent_id_code_key DO UPDATE SET
-				name=$2, description=$2, address=$3, city=$4, state=$5, zip=$6, phone=$7,
-				tax_jurisdiction_code=$8, default_tax_rate=$9, timezone='America/Vancouver', active=TRUE
-			RETURNING id`,
-			b.Code, b.Name, b.Addr, b.City, b.State, b.Zip, b.Phone, b.TaxJur, b.TaxRate).Scan(&id)
+		err := db.QueryRow(`SELECT id FROM locations WHERE type='BRANCH' AND code=$1 LIMIT 1`, b.Code).Scan(&id)
 		if err != nil {
-			log.Printf("Branch %s: %v", b.Code, err)
-			db.QueryRow("SELECT id FROM locations WHERE code=$1 AND type='BRANCH'", b.Code).Scan(&id)
+			// Not found → insert.
+			err = db.QueryRow(`INSERT INTO locations
+				(id, code, type, description, path, name, address, city, state, zip, phone, tax_jurisdiction_code, default_tax_rate, timezone, active)
+				VALUES (gen_random_uuid(), $1, 'BRANCH', $2, $1, $2, $3, $4, $5, $6, $7, $8, $9, 'America/Vancouver', TRUE)
+				RETURNING id`,
+				b.Code, b.Name, b.Addr, b.City, b.State, b.Zip, b.Phone, b.TaxJur, b.TaxRate).Scan(&id)
+			if err != nil {
+				log.Printf("Branch %s insert: %v", b.Code, err)
+				continue
+			}
+		} else {
+			// Found → update in place.
+			_, err = db.Exec(`UPDATE locations SET
+				description=$2, name=$2, address=$3, city=$4, state=$5, zip=$6, phone=$7,
+				tax_jurisdiction_code=$8, default_tax_rate=$9, timezone='America/Vancouver',
+				active=TRUE, updated_at=NOW()
+				WHERE id=$1`,
+				id, b.Name, b.Addr, b.City, b.State, b.Zip, b.Phone, b.TaxJur, b.TaxRate)
+			if err != nil {
+				log.Printf("Branch %s update: %v", b.Code, err)
+			}
 		}
 		if id != "" {
 			branchIDs[b.Code] = uuid.MustParse(id)
@@ -404,35 +481,37 @@ func main() {
 		Role  string
 	}
 	salesReps := []salesRep{
-		{"a1b2c3d4-0001-4000-8000-000000000001", "Sarah Mitchell", "sarah.m@gable.com", "250-555-5001", "Sales Manager"},
-		{"a1b2c3d4-0002-4000-8000-000000000002", "Jake Rodriguez", "jake.r@gable.com", "250-555-5002", "Sales Rep"},
-		{"a1b2c3d4-0003-4000-8000-000000000003", "Emily Chen", "emily.c@gable.com", "250-555-5003", "Account Executive"},
-		{"a1b2c3d4-0004-4000-8000-000000000004", "Marcus Williams", "marcus.w@gable.com", "250-555-5004", "Sales Rep"},
-		{"a1b2c3d4-0005-4000-8000-000000000005", "Tyler Brooks", "tyler.b@gable.com", "250-555-5005", "Sales Rep"},
-		{"a1b2c3d4-0006-4000-8000-000000000006", "Rachel Dunn", "rachel.d@gable.com", "250-555-5006", "Account Executive"},
+		{"a1b2c3d4-0001-4000-8000-000000000001", "Heather Macdonald", "heather.m@gablelumber.ca", "250-555-5001", "Sales Manager"},
+		{"a1b2c3d4-0002-4000-8000-000000000002", "Ethan Gagnon", "ethan.g@gablelumber.ca", "250-555-5002", "Sales Rep"},
+		{"a1b2c3d4-0003-4000-8000-000000000003", "Priya Brar", "priya.b@gablelumber.ca", "250-555-5003", "Account Executive"},
+		{"a1b2c3d4-0004-4000-8000-000000000004", "Cameron Fraser", "cameron.f@gablelumber.ca", "250-555-5004", "Sales Rep"},
+		{"a1b2c3d4-0005-4000-8000-000000000005", "Lucas Pelletier", "lucas.p@gablelumber.ca", "250-555-5005", "Sales Rep"},
+		{"a1b2c3d4-0006-4000-8000-000000000006", "Amanda Wong", "amanda.w@gablelumber.ca", "250-555-5006", "Account Executive"},
 	}
 	for _, sr := range salesReps {
 		db.Exec(`INSERT INTO sales_team (id, name, email, phone, role)
-			VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`, sr.ID, sr.Name, sr.Email, sr.Phone, sr.Role)
+			VALUES ($1,$2,$3,$4,$5)
+			ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, email=EXCLUDED.email, phone=EXCLUDED.phone, role=EXCLUDED.role`,
+			sr.ID, sr.Name, sr.Email, sr.Phone, sr.Role)
 	}
 	fmt.Printf("Seed: %d Sales Team Members\n", len(salesReps))
 
 	// Salesperson-to-customer assignments.
 	custSalesperson := make(map[uuid.UUID]string)
 	spAssignments := map[string]string{
-		"Okanagan Homes Ltd":         "a1b2c3d4-0001-4000-8000-000000000001", // Sarah Mitchell - top account
-		"Mission Hill Custom":        "a1b2c3d4-0001-4000-8000-000000000001", // Sarah Mitchell - top account
-		"Kelbrook Construction":      "a1b2c3d4-0003-4000-8000-000000000003", // Emily Chen
-		"Peachland Framing Crew":     "a1b2c3d4-0003-4000-8000-000000000003", // Emily Chen
-		"Glenmore Heritage Reno":     "a1b2c3d4-0006-4000-8000-000000000006", // Rachel Dunn
-		"Vernon Valley Construction": "a1b2c3d4-0006-4000-8000-000000000006", // Rachel Dunn
-		"Predator Ridge Renos":       "a1b2c3d4-0002-4000-8000-000000000002", // Jake Rodriguez
-		"Lake Country Builders":      "a1b2c3d4-0002-4000-8000-000000000002", // Jake Rodriguez
-		"Summerland Roofers":         "a1b2c3d4-0004-4000-8000-000000000004", // Marcus Williams
-		"Westbank Decks & Fence":     "a1b2c3d4-0004-4000-8000-000000000004", // Marcus Williams
-		"Big White Cabin Co":         "a1b2c3d4-0004-4000-8000-000000000004", // Marcus Williams
-		"Knox Mountain Landscapes":   "a1b2c3d4-0005-4000-8000-000000000005", // Tyler Brooks
-		"Okanagan DIY Owner":         "a1b2c3d4-0005-4000-8000-000000000005", // Tyler Brooks
+		"Okanagan Homes Ltd":         "a1b2c3d4-0001-4000-8000-000000000001", // Heather Macdonald - top account
+		"Mission Hill Custom":        "a1b2c3d4-0001-4000-8000-000000000001", // Heather Macdonald - top account
+		"Kelbrook Construction":      "a1b2c3d4-0003-4000-8000-000000000003", // Priya Brar
+		"Peachland Framing Crew":     "a1b2c3d4-0003-4000-8000-000000000003", // Priya Brar
+		"Glenmore Heritage Reno":     "a1b2c3d4-0006-4000-8000-000000000006", // Amanda Wong
+		"Vernon Valley Construction": "a1b2c3d4-0006-4000-8000-000000000006", // Amanda Wong
+		"Predator Ridge Renos":       "a1b2c3d4-0002-4000-8000-000000000002", // Ethan Gagnon
+		"Lake Country Builders":      "a1b2c3d4-0002-4000-8000-000000000002", // Ethan Gagnon
+		"Summerland Roofers":         "a1b2c3d4-0004-4000-8000-000000000004", // Cameron Fraser
+		"Westbank Decks & Fence":     "a1b2c3d4-0004-4000-8000-000000000004", // Cameron Fraser
+		"Big White Cabin Co":         "a1b2c3d4-0004-4000-8000-000000000004", // Cameron Fraser
+		"Knox Mountain Landscapes":   "a1b2c3d4-0005-4000-8000-000000000005", // Lucas Pelletier
+		"Okanagan DIY Owner":         "a1b2c3d4-0005-4000-8000-000000000005", // Lucas Pelletier
 	}
 	for custName, custID := range customerIDs {
 		if spID, ok := spAssignments[custName]; ok {
@@ -625,12 +704,12 @@ func main() {
 		Name, License, Phone, Email, CDLClass, CDLExpiry, HireDate string
 	}
 	drvs := []driver{
-		{"Mike Johnson", "BC-CDL-88421", "250-555-4001", "mike.j@gable.com", "1", "2026-11-15", "2019-03-01"},
-		{"Carlos Rivera", "BC-CDL-77332", "250-555-4002", "carlos.r@gable.com", "3", "2027-02-28", "2020-06-15"},
-		{"Dave Thompson", "BC-CDL-66243", "250-555-4003", "dave.t@gable.com", "1", "2026-08-30", "2018-01-10"},
-		{"Jake Wilson", "BC-CDL-55154", "250-555-4004", "jake.w@gable.com", "3", "2027-05-15", "2021-09-20"},
-		{"Sarah Mitchell", "BC-CDL-44065", "250-555-4005", "sarah.m@gable.com", "1", "2027-01-20", "2022-04-15"},
-		{"Tommy Nguyen", "BC-CDL-33976", "250-555-4006", "tommy.n@gable.com", "5", "2026-12-01", "2023-01-08"},
+		{"Ryan MacKenzie", "BC-CDL-88421", "250-555-4001", "ryan.m@gablelumber.ca", "1", "2026-11-15", "2019-03-01"},
+		{"Daniel Sandhu", "BC-CDL-77332", "250-555-4002", "daniel.s@gablelumber.ca", "3", "2027-02-28", "2020-06-15"},
+		{"Connor Tremblay", "BC-CDL-66243", "250-555-4003", "connor.t@gablelumber.ca", "1", "2026-08-30", "2018-01-10"},
+		{"Marc Cardinal", "BC-CDL-55154", "250-555-4004", "marc.c@gablelumber.ca", "3", "2027-05-15", "2021-09-20"},
+		{"Brendan Lee", "BC-CDL-44065", "250-555-4005", "brendan.l@gablelumber.ca", "1", "2027-01-20", "2022-04-15"},
+		{"Tyler Beaudry", "BC-CDL-33976", "250-555-4006", "tyler.b@gablelumber.ca", "5", "2026-12-01", "2023-01-08"},
 	}
 	driverIDs := make([]uuid.UUID, 0)
 	for _, d := range drvs {
@@ -965,13 +1044,19 @@ func main() {
 	fmt.Println("Seed: Portal Users (demo@kelbrook.ca / okhomes@gable.com / missionhill@gable.com, password: 'password')")
 
 	// =========================================================================
-	// 22. OFFLINE POS SYNC LOGS
+	// 22. POS REGISTERS + OFFLINE POS SYNC LOGS
 	// =========================================================================
+	// POSTerminal.ts hardcodes the register id "REG-01"; without a row in
+	// pos_registers, /api/v1/pos/transactions fails with "failed to resolve
+	// register branch".
+	db.Exec(`INSERT INTO pos_registers (id, location_id, branch_id, name, is_active)
+		VALUES ('REG-01', $1, $1, 'Main Counter - Kelowna', true)
+		ON CONFLICT (id) DO NOTHING`, kelMainID.String())
 	db.Exec(`INSERT INTO pos_sync_log (batch_id, register_id, synced_count, duplicate_count, error_count, synced_at)
-		VALUES ('sync-batch-001', 'REG-1', 42, 0, 0, NOW() - interval '2 hours')`)
+		VALUES ('sync-batch-001', 'REG-01', 42, 0, 0, NOW() - interval '2 hours')`)
 	db.Exec(`INSERT INTO pos_sync_log (batch_id, register_id, synced_count, duplicate_count, error_count, synced_at)
-		VALUES ('sync-batch-002', 'REG-2', 15, 2, 0, NOW() - interval '30 minutes')`)
-	fmt.Println("Seed: Offline POS Sync Logs")
+		VALUES ('sync-batch-002', 'REG-01', 15, 2, 0, NOW() - interval '30 minutes')`)
+	fmt.Println("Seed: POS Registers + Offline POS Sync Logs")
 
 	// =========================================================================
 	// 23. EDI TRADING PARTNERS

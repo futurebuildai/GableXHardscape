@@ -13,18 +13,18 @@ import (
 
 // catalogRow is an internal struct for raw DB product rows before enrichment.
 type catalogRow struct {
-	ID        uuid.UUID
-	SKU       string
-	Name      string
-	Category  string
-	Species   string
-	Grade     string
-	ImageURL  string
-	UOM       string
-	BasePrice float64
-	WeightLbs float64
-	UPC       string
-	Vendor    string
+	ID           uuid.UUID
+	SKU          string
+	Name         string
+	Category     string
+	Manufacturer string
+	Collection   string
+	ImageURL     string
+	UOM          string
+	BasePrice    float64
+	WeightLbs    float64
+	UPC          string
+	Vendor       string
 }
 
 // ListCatalog returns catalog products enriched with customer-specific pricing and availability.
@@ -43,15 +43,15 @@ func (s *Service) ListCatalog(ctx context.Context, customerID uuid.UUID, filter 
 	products := make([]CatalogProductDTO, 0, len(rows))
 	for _, row := range rows {
 		dto := CatalogProductDTO{
-			ID:        row.ID,
-			SKU:       row.SKU,
-			Name:      row.Name,
-			Category:  row.Category,
-			Species:   row.Species,
-			Grade:     row.Grade,
-			ImageURL:  row.ImageURL,
-			UOM:       row.UOM,
-			BasePrice: row.BasePrice,
+			ID:           row.ID,
+			SKU:          row.SKU,
+			Name:         row.Name,
+			Category:     row.Category,
+			Manufacturer: row.Manufacturer,
+			Collection:   row.Collection,
+			ImageURL:     row.ImageURL,
+			UOM:          row.UOM,
+			BasePrice:    row.BasePrice,
 		}
 
 		// Pricing waterfall
@@ -93,15 +93,15 @@ func (s *Service) GetCatalogProduct(ctx context.Context, customerID, productID u
 
 	dto := &CatalogDetailDTO{
 		CatalogProductDTO: CatalogProductDTO{
-			ID:        row.ID,
-			SKU:       row.SKU,
-			Name:      row.Name,
-			Category:  row.Category,
-			Species:   row.Species,
-			Grade:     row.Grade,
-			ImageURL:  row.ImageURL,
-			UOM:       row.UOM,
-			BasePrice: row.BasePrice,
+			ID:           row.ID,
+			SKU:          row.SKU,
+			Name:         row.Name,
+			Category:     row.Category,
+			Manufacturer: row.Manufacturer,
+			Collection:   row.Collection,
+			ImageURL:     row.ImageURL,
+			UOM:          row.UOM,
+			BasePrice:    row.BasePrice,
 		},
 		WeightLbs: row.WeightLbs,
 		UPC:       row.UPC,

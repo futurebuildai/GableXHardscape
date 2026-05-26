@@ -1,4 +1,5 @@
 import { LitElement, html } from 'lit';
+import { formatCents } from '../../lib/utils.ts';
 import { customElement, state } from 'lit/decorators.js';
 import { icon } from '../../lib/icons.ts';
 import { router } from '../../lib/router.ts';
@@ -116,7 +117,7 @@ export class GableOrderList extends LitElement {
                                         </span>
                                     </td>
                                     <td class="p-4 font-mono text-right text-gable-green">
-                                        $${order.total_amount.toFixed(2)}
+                                        ${formatCents(order.total_amount)}
                                     </td>
                                     <td class="p-4 text-right">
                                         <button

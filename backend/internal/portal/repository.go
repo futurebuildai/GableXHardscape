@@ -67,15 +67,35 @@ func (r *Repository) GetPortalConfig(ctx context.Context) (*PortalConfig, error)
 }
 
 // GetCustomerARSummary fetches balance, credit limit, and past-due amount.
+//
+// Balance is computed live from the invoices table (sum of all UNPAID/OVERDUE
+// invoice totals) rather than read from the denormalized customers.balance_due
+// column. The stored column is not maintained by the seed pipeline or the
+// invoice write paths, so reading it produced stale zeros while past_due
+// (already live-computed) reported real numbers — making the portal dashboard
+// contradict itself. Credit limit still comes from customers since it is a
+// policy value, not an accumulated balance.
 func (r *Repository) GetCustomerARSummary(ctx context.Context, customerID uuid.UUID) (balance, creditLimit, pastDue float64, err error) {
-	// Balance and credit limit from customers table
-	custQuery := `SELECT COALESCE(balance_due, 0)::float8, COALESCE(credit_limit, 0)::float8 FROM customers WHERE id = $1`
-	err = r.db.GetExecutor(ctx).QueryRow(ctx, custQuery, customerID).Scan(&balance, &creditLimit)
+	// Credit limit (policy value) from customers table.
+	creditQuery := `SELECT COALESCE(credit_limit, 0)::float8 FROM customers WHERE id = $1`
+	err = r.db.GetExecutor(ctx).QueryRow(ctx, creditQuery, customerID).Scan(&creditLimit)
 	if err != nil {
-		return 0, 0, 0, fmt.Errorf("failed to get customer AR: %w", err)
+		return 0, 0, 0, fmt.Errorf("failed to get customer credit limit: %w", err)
 	}
 
-	// Past due: sum of unpaid/overdue invoices past their due date
+	// Current balance: sum of all open invoices (unpaid or overdue), regardless of due date.
+	balanceQuery := `
+		SELECT COALESCE(SUM(total_amount), 0)::float8
+		FROM invoices
+		WHERE customer_id = $1
+		  AND status IN ('UNPAID', 'OVERDUE')
+	`
+	err = r.db.GetExecutor(ctx).QueryRow(ctx, balanceQuery, customerID).Scan(&balance)
+	if err != nil {
+		return 0, 0, 0, fmt.Errorf("failed to get current balance: %w", err)
+	}
+
+	// Past due: subset of the balance whose due_date is already in the past.
 	pastDueQuery := `
 		SELECT COALESCE(SUM(total_amount), 0)::float8
 		FROM invoices
@@ -427,7 +447,7 @@ func (r *Repository) CreateReorder(ctx context.Context, customerID, sourceOrderI
 func (r *Repository) ListCatalogProducts(ctx context.Context, filter CatalogFilter) ([]catalogRow, error) {
 	query := `
 		SELECT p.id, p.sku, p.description,
-		       COALESCE(p.category, ''), COALESCE(p.species, ''), COALESCE(p.grade, ''),
+		       COALESCE(p.category, ''), COALESCE(p.manufacturer, ''), COALESCE(p.collection, ''),
 		       COALESCE(p.image_url, ''), p.uom_primary::text, COALESCE(p.base_price, 0)
 		FROM products p
 		WHERE 1=1
@@ -445,14 +465,14 @@ func (r *Repository) ListCatalogProducts(ctx context.Context, filter CatalogFilt
 		args = append(args, filter.Category)
 		argIdx++
 	}
-	if filter.Species != "" {
-		query += fmt.Sprintf(` AND p.species = $%d`, argIdx)
-		args = append(args, filter.Species)
+	if filter.Manufacturer != "" {
+		query += fmt.Sprintf(` AND p.manufacturer = $%d`, argIdx)
+		args = append(args, filter.Manufacturer)
 		argIdx++
 	}
-	if filter.Grade != "" {
-		query += fmt.Sprintf(` AND p.grade = $%d`, argIdx)
-		args = append(args, filter.Grade)
+	if filter.Collection != "" {
+		query += fmt.Sprintf(` AND p.collection = $%d`, argIdx)
+		args = append(args, filter.Collection)
 		argIdx++
 	}
 
@@ -469,7 +489,7 @@ func (r *Repository) ListCatalogProducts(ctx context.Context, filter CatalogFilt
 		var p catalogRow
 		if err := rows.Scan(
 			&p.ID, &p.SKU, &p.Name,
-			&p.Category, &p.Species, &p.Grade,
+			&p.Category, &p.Manufacturer, &p.Collection,
 			&p.ImageURL, &p.UOM, &p.BasePrice,
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan catalog product: %w", err)
@@ -486,7 +506,7 @@ func (r *Repository) ListCatalogProducts(ctx context.Context, filter CatalogFilt
 func (r *Repository) GetCatalogProduct(ctx context.Context, productID uuid.UUID) (*catalogRow, error) {
 	query := `
 		SELECT p.id, p.sku, p.description,
-		       COALESCE(p.category, ''), COALESCE(p.species, ''), COALESCE(p.grade, ''),
+		       COALESCE(p.category, ''), COALESCE(p.manufacturer, ''), COALESCE(p.collection, ''),
 		       COALESCE(p.image_url, ''), p.uom_primary::text, COALESCE(p.base_price, 0),
 		       COALESCE(p.weight_lbs, 0), COALESCE(p.upc, ''), COALESCE(p.vendor, '')
 		FROM products p
@@ -495,7 +515,7 @@ func (r *Repository) GetCatalogProduct(ctx context.Context, productID uuid.UUID)
 	var p catalogRow
 	err := r.db.GetExecutor(ctx).QueryRow(ctx, query, productID).Scan(
 		&p.ID, &p.SKU, &p.Name,
-		&p.Category, &p.Species, &p.Grade,
+		&p.Category, &p.Manufacturer, &p.Collection,
 		&p.ImageURL, &p.UOM, &p.BasePrice,
 		&p.WeightLbs, &p.UPC, &p.Vendor,
 	)

@@ -57,8 +57,8 @@ export class ProjectDashboard extends LitElement {
         }
     }
 
-    private _formatCurrency(amount: number): string {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    private _formatCurrency(cents: number): string {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((cents || 0) / 100);
     }
 
     private _renderItemRow(item: ProjectItem, iconData: Parameters<typeof icon>[0], colorClass: string, linkPrefix: string) {

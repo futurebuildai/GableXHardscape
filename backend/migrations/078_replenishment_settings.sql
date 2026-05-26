@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS replenishment_drafts (
     status          TEXT NOT NULL DEFAULT 'PENDING_REVIEW'
                     CHECK (status IN ('PENDING_REVIEW','APPROVED','REJECTED','EXPIRED')),
     generated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    reviewed_by     UUID REFERENCES accounts(id),
+    reviewed_by     UUID,
     reviewed_at     TIMESTAMPTZ,
     notes           TEXT,
     confidence      DECIMAL(5,2) NOT NULL DEFAULT 0,     -- 0–100 confidence score

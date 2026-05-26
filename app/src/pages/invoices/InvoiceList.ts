@@ -1,4 +1,5 @@
 import { LitElement, html } from 'lit';
+import { formatCents } from '../../lib/utils.ts';
 import { customElement, state } from 'lit/decorators.js';
 import { router } from '../../lib/router.ts';
 import { InvoiceService } from '../../services/InvoiceService.ts';
@@ -100,7 +101,7 @@ export class GableInvoiceList extends LitElement {
                                         <td class="px-6 py-3 font-mono text-zinc-400">${inv.order_id.slice(0, 8)}</td>
                                         <td class="px-6 py-3 text-zinc-300">${inv.customer_name || inv.customer_id.slice(0, 8)}</td>
                                         <td class="px-6 py-3 text-right font-mono text-emerald-400 font-medium">
-                                            $${inv.total_amount.toFixed(2)}
+                                            ${formatCents(inv.total_amount)}
                                         </td>
                                         <td class="px-6 py-3">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${this.getStatusClass(inv.status)}">
