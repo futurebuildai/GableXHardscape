@@ -11,6 +11,9 @@ import './components/layout/yard-layout.ts';
 // Import toast container (global)
 import './components/ui/toast-container.ts';
 
+// Import feedback widget (global — floating FAB on all pages)
+import './components/ui/feedback-widget.ts';
+
 // Import not-found page (fallback for unknown routes)
 import './components/ui/not-found.ts';
 
@@ -174,16 +177,16 @@ export class GableApp extends LitElement {
 
     switch (layout) {
       case 'erp':
-        return html`<gable-app-shell .pageContent=${pageHtml}></gable-app-shell><gable-toast-container></gable-toast-container>`;
+        return html`<gable-app-shell .pageContent=${pageHtml}></gable-app-shell><gable-toast-container></gable-toast-container><gable-feedback-widget></gable-feedback-widget>`;
       case 'portal':
-        return html`<gable-portal-layout .pageContent=${pageHtml}></gable-portal-layout><gable-toast-container></gable-toast-container>`;
+        return html`<gable-portal-layout .pageContent=${pageHtml}></gable-portal-layout><gable-toast-container></gable-toast-container><gable-feedback-widget></gable-feedback-widget>`;
       case 'driver':
-        return html`<gable-driver-layout .pageContent=${pageHtml}></gable-driver-layout><gable-toast-container></gable-toast-container>`;
+        return html`<gable-driver-layout .pageContent=${pageHtml}></gable-driver-layout><gable-toast-container></gable-toast-container><gable-feedback-widget></gable-feedback-widget>`;
       case 'yard':
-        return html`<gable-yard-layout .pageContent=${pageHtml}></gable-yard-layout><gable-toast-container></gable-toast-container>`;
+        return html`<gable-yard-layout .pageContent=${pageHtml}></gable-yard-layout><gable-toast-container></gable-toast-container><gable-feedback-widget></gable-feedback-widget>`;
       case 'none':
       default:
-        return html`${pageHtml}<gable-toast-container></gable-toast-container>`;
+        return html`${pageHtml}<gable-toast-container></gable-toast-container><gable-feedback-widget></gable-feedback-widget>`;
     }
   }
 

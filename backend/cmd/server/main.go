@@ -25,6 +25,7 @@ import (
 	"github.com/futurebuildai/gablexhardscape/internal/delivery"
 	"github.com/futurebuildai/gablexhardscape/internal/document"
 	"github.com/futurebuildai/gablexhardscape/internal/edi"
+	"github.com/futurebuildai/gablexhardscape/internal/feedback"
 	"github.com/futurebuildai/gablexhardscape/internal/gl"
 	"github.com/futurebuildai/gablexhardscape/internal/governance"
 	"github.com/futurebuildai/gablexhardscape/internal/integrations"
@@ -571,6 +572,14 @@ func main() {
 	projectSvc := project.NewService(projectRepo)
 	projectHandler := project.NewHandler(projectSvc)
 	projectHandler.RegisterRoutes(mux, portalMw)
+
+	// Feedback Module — cross-platform testing feedback with Google Chat notifications
+	feedbackRepo := feedback.NewRepository(db)
+	feedbackNotifier := feedback.NewNotifier(logger)
+	feedbackSvc := feedback.NewService(feedbackRepo, feedbackNotifier, logger)
+	feedbackHandler := feedback.NewHandler(feedbackSvc)
+	feedbackHandler.RegisterERPRoutes(mux, middleware.RequireRole("admin", "owner", "sales", "warehouse", "finance", "cashier"))
+	feedbackHandler.RegisterPortalRoutes(mux, portalMw)
 
 	// Integration API (FB-Brain cross-system endpoints)
 	integrationAPIKey := os.Getenv("INTEGRATION_API_KEY")
