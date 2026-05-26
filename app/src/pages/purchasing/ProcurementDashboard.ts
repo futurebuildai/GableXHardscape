@@ -1,12 +1,10 @@
 import { LitElement, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { icon } from '../../lib/icons.ts';
-import { ArrowLeft, RefreshCw, CheckCircle, XCircle, Package, TrendingUp, Clock, ShoppingCart, Edit3, AlertTriangle } from 'lucide';
-import { PurchaseOrderService } from '../../services/PurchaseOrderService.ts';
+import { ArrowLeft, RefreshCw, CheckCircle, XCircle, Package, TrendingUp, Clock, ShoppingCart } from 'lucide';
 import { ToastService } from '../../lib/toast-service.ts';
 import { router } from '../../lib/router.ts';
 import type { DashboardSummary, VendorDraftGroup, ReplenishmentDraft } from '../../types/replenishment.ts';
-import type { UrgencyLevel } from '../../types/purchaseOrder.ts';
 
 /**
  * Procurement Dashboard — Human-in-the-Loop Review Panel
@@ -72,7 +70,7 @@ export class GableProcurementDashboard extends LitElement {
         }
     }
 
-    private async _handleReject(draft: ReplenishmentDraft) {
+    private async _handleReject(_draft: ReplenishmentDraft) {
         // TODO: Show rejection notes modal before calling reject endpoint
         try {
             // TODO: Call PurchaseOrderService.rejectProcurementDraft(draft.id, notes)

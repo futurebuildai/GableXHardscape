@@ -1,4 +1,4 @@
-import { LitElement, html, nothing } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { icon } from '../../lib/icons.ts';
 import { ArrowLeft, Save, RefreshCw, Settings, Package, Clock, TrendingUp } from 'lucide';
@@ -23,7 +23,7 @@ export class GableReplenishmentSettings extends LitElement {
 
     @state() private settings: ReplenishmentSetting[] = [];
     @state() private loading = true;
-    @state() private editingId: string | null = null;
+    // @state() private editingId: string | null = null;
 
     connectedCallback() {
         super.connectedCallback();
@@ -43,6 +43,7 @@ export class GableReplenishmentSettings extends LitElement {
         }
     }
 
+    /*
     private async _handleSave(setting: ReplenishmentSetting) {
         try {
             // TODO: Call PurchaseOrderService.upsertReplenishmentSetting(setting.product_id, setting)
@@ -54,6 +55,7 @@ export class GableReplenishmentSettings extends LitElement {
             ToastService.show('Failed to save setting', 'error');
         }
     }
+    */
 
     render() {
         return html`
